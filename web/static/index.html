@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="el">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard Αποκομιδής Ογκωδών</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>Αποκομιδή Ογκωδών Αντικειμένων</h1>
+      <p>Δήμος Θεσσαλονίκης - επιχειρησιακή εικόνα καθαριότητας</p>
+    </div>
+    <div class="week" id="weekLabel">Φόρτωση...</div>
+  </header>
+
+  <main>
+    <section class="filters" aria-label="Φίλτρα">
+      <label>
+        <span>Κατάσταση</span>
+        <select id="statusFilter">
+          <option value="">Όλες</option>
+        </select>
+      </label>
+      <label>
+        <span>Πηγή</span>
+        <select id="sourceFilter">
+          <option value="">Όλες</option>
+        </select>
+      </label>
+      <label>
+        <span>Ημέρα / περίοδος</span>
+        <select id="dayFilter">
+          <option value="">Όλες</option>
+        </select>
+      </label>
+      <label>
+        <span>Οδός</span>
+        <input id="streetFilter" type="search" placeholder="Αναζήτηση οδού">
+      </label>
+    </section>
+
+    <p id="syncNote" class="sync-note" aria-live="polite"></p>
+    <p id="filterHint" class="filter-hint" hidden>
+      Τα φίλτρα εφαρμόζονται στον <strong>πίνακα εγγραφών</strong> στην καρτέλα «Αναλυτικά»· τα διαγράμματα της «Επισκόπησης»
+      παραμένουν συγκεντρωτικά για όλη την εβδομάδα.
+    </p>
+
+    <nav class="tabs" aria-label="Καρτέλες">
+      <button class="tab active" data-panel="overview">Επισκόπηση</button>
+      <button class="tab" data-panel="streets">Οδοί</button>
+      <button class="tab" data-panel="records">Αναλυτικά</button>
+      <button class="tab" data-panel="stats">Στατιστικά</button>
+    </nav>
+
+    <section id="overview" class="panel-view active">
+      <div class="kpis">
+        <article class="kpi" id="weekStatusCard">
+          <span>Κατάσταση εβδομάδας</span>
+          <strong id="weekStatus">-</strong>
+          <small id="weekStatusNote">-</small>
+        </article>
+        <article class="kpi">
+          <span>Εκκρεμή</span>
+          <strong id="pendingKpi">-</strong>
+          <small>Σημεία που μεταφέρονται</small>
+        </article>
+        <article
+          class="kpi"
+          title="Στο φύλλο: ο αριθμός εμφανίζεται τουλάχιστον δύο φορές στην ίδια γραμμή (ταύτιση). Δεν ισοδυναμεί με χειροκίνητη επιβεβαίωση διαδρομής οχήματος."
+        >
+          <span>Συλλεχθέντα / επιλυμένα</span>
+          <strong id="collectedKpi">-</strong>
+          <small>Ταυτίσεις αριθμού στην γραμμή + ιστορικό (hybrid)</small>
+        </article>
+        <article class="kpi">
+          <span>Συλλογές ημερών</span>
+          <strong id="dayCollectedKpi">-</strong>
+          <small>Μόνο Δευτέρα-Κυριακή</small>
+        </article>
+      </div>
+
+      <div class="insight" id="insightText">Φόρτωση συμπεράσματος...</div>
+
+      <div class="grid two">
+        <section class="card">
+          <h2>Συλλεχθέντα ανά ημέρα</h2>
+          <div id="collectedByDay" class="bars"></div>
+        </section>
+        <section class="card">
+          <h2>Εκκρεμή ανά ημέρα</h2>
+          <div id="pendingByDay" class="bars"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="streets" class="panel-view">
+      <section class="card">
+        <h2>Οδοί υψηλής πίεσης</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Οδός</th>
+              <th>Εκκρεμή</th>
+            </tr>
+          </thead>
+          <tbody id="topStreetsBody"></tbody>
+        </table>
+      </section>
+    </section>
+
+    <section id="records" class="panel-view">
+      <section class="card">
+        <div class="table-title">
+          <h2>Αναλυτικές εγγραφές</h2>
+          <span id="recordCount">-</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Οδός</th>
+              <th>Ημέρα / περίοδος</th>
+              <th>Σημείο</th>
+              <th>Κατάσταση</th>
+              <th>Πηγή</th>
+            </tr>
+          </thead>
+          <tbody id="recordsBody"></tbody>
+        </table>
+      </section>
+    </section>
+
+    <section id="stats" class="panel-view">
+      <p class="stats-intro sync-note">
+        Ημερήσια στατιστικά υπολογίζονται από τις εγγραφές (Δευτέρα–Κυριακή). Οι καμπύλες «Εβδομάδα» και «Μήνας»
+        χρησιμοποιούν αυτόματα αποθηκευμένα στιγμιότυπα μετά από κάθε επιτυχή ενημέρωση από το φύλλο (ως όταν να υπάρξουν αρκετά ιστορικά δεδομένα).
+      </p>
+
+      <div class="stats-kpis">
+        <article class="kpi kpi-compact">
+          <span>Μέσος ημερήσιος λόγος συλλεχθέντων</span>
+          <strong id="statRatioMean">—</strong>
+          <small>Επί του συνόλου εγγραφών ανά ημέρα εργασίας</small>
+        </article>
+        <article class="kpi kpi-compact">
+          <span>Τυπική απόκλιση λόγου</span>
+          <strong id="statRatioStdev">—</strong>
+          <small>Μεταξύ ημερών της εβδομάδας (ενδείξεις ανομοιογένειας)</small>
+        </article>
+        <article class="kpi kpi-compact">
+          <span>Ημέρες–outliers λόγου</span>
+          <strong id="statOutlierDays">—</strong>
+          <small>&gt;2σ από μέσο όρο ημερών με στοιχεία</small>
+        </article>
+        <article class="kpi kpi-compact">
+          <span>Σύνολο εβδομαδιαίων snapshots</span>
+          <strong id="statSnapshotsCount">—</strong>
+          <small>Για τάσεις εβδομάδας/μήνα</small>
+        </article>
+        <article class="kpi kpi-compact">
+          <span>Συνολικός λόγος (φύλλο)</span>
+          <strong id="statOverallRatio">—</strong>
+          <small>Συλλεχθέντα / (εκκρεμή + συλλεχθέντα)</small>
+        </article>
+      </div>
+
+      <div class="stats-grid">
+        <section class="card stats-chart-card">
+          <h2>Ημέρα: εκκρεμή vs συλλεχθέντα</h2>
+          <div class="chart-wrap">
+            <canvas id="chartDailyBars" aria-label="Στήλες εκκρεμών και συλλεχθέντων ανά ημέρα"></canvas>
+          </div>
+        </section>
+        <section class="card stats-chart-card">
+          <h2>Ημέρα: λόγος συλλεχθέντων</h2>
+          <div class="chart-wrap">
+            <canvas id="chartDailyRatio" aria-label="Ποσοστό συλλεχθέντων ανά ημέρα"></canvas>
+          </div>
+        </section>
+        <section class="card stats-chart-card stats-span-wide">
+          <h2>Εβδομάδα: τάση εκκρεμών και συλλεχθέντων (snapshots)</h2>
+          <p id="statsWeeklyHint" class="stats-hint" aria-live="polite"></p>
+          <div class="chart-wrap chart-wrap-tall">
+            <canvas id="chartWeeklyTrend" aria-label="Εξέλιξη ανά εβδομαδιαίο στιγμιότυπο"></canvas>
+          </div>
+        </section>
+        <section class="card stats-chart-card stats-span-wide">
+          <h2>Μήνας: μέσοι όροι ανά μήνα (από snapshots)</h2>
+          <p id="statsMonthlyHint" class="stats-hint" aria-live="polite"></p>
+          <div class="chart-wrap chart-wrap-tall">
+            <canvas id="chartMonthlyBars" aria-label="Μέσοι εβδομαδιαίοι όγκοι ανά ημερολογιακό μήνα"></canvas>
+          </div>
+        </section>
+      </div>
+
+      <section class="card stats-report-card">
+        <h2>Εβδομαδιαία ανασκόπηση (κείμενο για διοίκηση)</h2>
+        <pre id="weeklyReportBlock" class="weekly-report"></pre>
+      </section>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="/static/app.js"></script>
+  <script src="/static/stats_panel.js"></script>
+</body>
+</html>

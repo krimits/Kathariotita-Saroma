@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+service-account.json
+*_credentials*.json
+output/
+*.xlsx
+
+# Τοπικά IDE / agent bundles — όχι μέρος της εφαρμογής
+.agents/
+skills-lock.json

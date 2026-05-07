@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="el">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard Αποκομιδής Ογκωδών</title>
+  <style>
+    :root {
+      --bg: #f5f7f9;
+      --panel: #ffffff;
+      --text: #1f2933;
+      --muted: #627080;
+      --line: #d9e0e7;
+      --green: #2f855a;
+      --green-bg: #e4f4ec;
+      --orange: #b7791f;
+      --orange-bg: #fff2d6;
+      --red: #c53030;
+      --red-bg: #fde2e2;
+      --blue: #2563eb;
+      --blue-bg: #e6efff;
+      --dark: #172033;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    header {
+      background: var(--dark);
+      color: #fff;
+      padding: 18px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 650;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      color: #c9d4df;
+      font-size: 13px;
+    }
+
+    .week-pill {
+      border: 1px solid rgba(255, 255, 255, .25);
+      border-radius: 6px;
+      padding: 9px 12px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    main {
+      padding: 18px 28px 34px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1.3fr repeat(4, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .filter {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 9px 10px;
+      min-height: 54px;
+    }
+
+    .filter label {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    .filter .value {
+      font-size: 14px;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .tab {
+      border: 1px solid var(--line);
+      border-bottom: none;
+      background: #edf2f7;
+      padding: 10px 14px;
+      border-radius: 6px 6px 0 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: #334155;
+      white-space: nowrap;
+    }
+
+    .tab.active {
+      background: var(--panel);
+      color: var(--blue);
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      min-height: 112px;
+    }
+
+    .card .label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .card .number {
+      font-size: 30px;
+      line-height: 1;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .card .note {
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .status-good {
+      background: var(--green-bg);
+      border-color: #b7dfca;
+    }
+
+    .status-warning {
+      background: var(--orange-bg);
+      border-color: #f3cf91;
+    }
+
+    .status-red {
+      background: var(--red-bg);
+      border-color: #f5b3b3;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+
+    .bars {
+      display: grid;
+      gap: 9px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 92px 1fr 44px;
+      gap: 10px;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .track {
+      height: 14px;
+      background: #eef2f6;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .fill {
+      height: 100%;
+      background: var(--blue);
+    }
+
+    .fill.green {
+      background: var(--green);
+    }
+
+    .fill.orange {
+      background: var(--orange);
+    }
+
+    .fill.red {
+      background: var(--red);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      padding: 9px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .badge {
+      display: inline-block;
+      border-radius: 5px;
+      padding: 4px 7px;
+      font-size: 12px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .badge.green {
+      color: var(--green);
+      background: var(--green-bg);
+    }
+
+    .badge.orange {
+      color: var(--orange);
+      background: var(--orange-bg);
+    }
+
+    .badge.red {
+      color: var(--red);
+      background: var(--red-bg);
+    }
+
+    .insight {
+      border-left: 4px solid var(--orange);
+      background: #fffaf0;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      border-radius: 6px;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    @media (max-width: 1050px) {
+      .toolbar,
+      .kpis,
+      .layout {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      main {
+        padding: 14px;
+      }
+
+      .toolbar,
+      .kpis,
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Αποκομιδή Ογκωδών Αντικειμένων</h1>
+      <div class="subtitle">Δήμος Θεσσαλονίκης - Επιχειρησιακή εικόνα καθαριότητας</div>
+    </div>
+    <div class="week-pill">Εβδομάδα: 04/05/2026 - 08/05/2026</div>
+  </header>
+
+  <main>
+    <section class="toolbar" aria-label="Φίλτρα">
+      <div class="filter">
+        <label>Περιοχή / αρχείο</label>
+        <div class="value">ΜΕΡΚΟΥΡΙΟΥ</div>
+      </div>
+      <div class="filter">
+        <label>Ημέρα</label>
+        <div class="value">Όλες</div>
+      </div>
+      <div class="filter">
+        <label>Κατάσταση</label>
+        <div class="value">Εκκρεμή + Συλλεχθέντα</div>
+      </div>
+      <div class="filter">
+        <label>Πηγή</label>
+        <div class="value">Όλες οι πηγές</div>
+      </div>
+      <div class="filter">
+        <label>Οδός</label>
+        <div class="value">Όλες οι οδοί</div>
+      </div>
+    </section>
+
+    <nav class="tabs" aria-label="Καρτέλες dashboard">
+      <div class="tab active">Επισκόπηση</div>
+      <div class="tab">Ημερήσια Ροή</div>
+      <div class="tab">Οδοί Υψηλής Πίεσης</div>
+      <div class="tab">Παλαιότητα</div>
+      <div class="tab">Ιστορική Τάση</div>
+    </nav>
+
+    <section class="kpis" aria-label="Βασικοί δείκτες">
+      <div class="card status-warning">
+        <div class="label">Υπόλοιπο επόμενης εβδομάδας</div>
+        <div class="number">184</div>
+        <div class="note">Καλή / διαχειρίσιμη κατάσταση</div>
+      </div>
+      <div class="card">
+        <div class="label">Συλλεχθέντα εβδομάδας</div>
+        <div class="number">126</div>
+        <div class="note">Σημεία που έκλεισαν</div>
+      </div>
+      <div class="card">
+        <div class="label">Νέες εκκρεμότητες</div>
+        <div class="number">208</div>
+        <div class="note">Από ημέρες και προηγούμενα υπόλοιπα</div>
+      </div>
+      <div class="card">
+        <div class="label">Ποσοστό ολοκλήρωσης</div>
+        <div class="number">41%</div>
+        <div class="note">Συλλεχθέντα / συνολικά σημεία</div>
+      </div>
+      <div class="card">
+        <div class="label">Οδοί με εκκρεμότητα</div>
+        <div class="number">17</div>
+        <div class="note">Χρειάζονται επιχειρησιακή προσοχή</div>
+      </div>
+    </section>
+
+    <section class="insight">
+      Η εβδομάδα εμφανίζεται σε διαχειρίσιμη κατάσταση, επειδή το υπόλοιπο βρίσκεται μεταξύ 100 και 300 σημείων. Η διοίκηση πρέπει να παρακολουθήσει κυρίως τις οδούς με επαναλαμβανόμενες εκκρεμότητες και την πηγή προέλευσης των νέων σημείων.
+    </section>
+
+    <section class="layout">
+      <div class="panel">
+        <h2>Ημερήσια ροή</h2>
+        <div class="bars">
+          <div class="bar-row">
+            <div>Δευτέρα</div>
+            <div class="track"><div class="fill green" style="width: 82%"></div></div>
+            <div>59</div>
+          </div>
+          <div class="bar-row">
+            <div>Τρίτη</div>
+            <div class="track"><div class="fill orange" style="width: 58%"></div></div>
+            <div>41</div>
+          </div>
+          <div class="bar-row">
+            <div>Τετάρτη</div>
+            <div class="track"><div class="fill orange" style="width: 14%"></div></div>
+            <div>10</div>
+          </div>
+          <div class="bar-row">
+            <div>Πέμπτη</div>
+            <div class="track"><div class="fill green" style="width: 2%"></div></div>
+            <div>1</div>
+          </div>
+          <div class="bar-row">
+            <div>Παρασκευή</div>
+            <div class="track"><div class="fill" style="width: 0%"></div></div>
+            <div>0</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Πηγή εκκρεμοτήτων</h2>
+        <div class="bars">
+          <div class="bar-row">
+            <div>Επόπτες</div>
+            <div class="track"><div class="fill orange" style="width: 64%"></div></div>
+            <div>64%</div>
+          </div>
+          <div class="bar-row">
+            <div>Βελτιώνω</div>
+            <div class="track"><div class="fill red" style="width: 36%"></div></div>
+            <div>36%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Top οδοί με εκκρεμότητες</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Οδός</th>
+              <th>Εκκρεμή</th>
+              <th>Πηγή</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ΛΑΜΠΡΟΥ ΠΟΡΦΥΡΑ</td>
+              <td>3</td>
+              <td><span class="badge orange">Επόπτες</span></td>
+            </tr>
+            <tr>
+              <td>ΑΙΓΑΙΟΥ</td>
+              <td>2</td>
+              <td><span class="badge red">Βελτιώνω</span></td>
+            </tr>
+            <tr>
+              <td>ΒΟΥΛΓΑΡΗ</td>
+              <td>2</td>
+              <td><span class="badge orange">Επόπτες</span></td>
+            </tr>
+            <tr>
+              <td>ΚΡΗΤΗΣ</td>
+              <td>2</td>
+              <td><span class="badge orange">Επόπτες</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h2>Κατάσταση εβδομάδας</h2>
+        <table>
+          <tbody>
+            <tr>
+              <td>0-100 σημεία</td>
+              <td><span class="badge green">Άριστη</span></td>
+            </tr>
+            <tr>
+              <td>101-299 σημεία</td>
+              <td><span class="badge orange">Καλή</span></td>
+            </tr>
+            <tr>
+              <td>300+ σημεία</td>
+              <td><span class="badge red">Κόκκινη</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

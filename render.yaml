@@ -1,0 +1,33 @@
+# Blueprint για Render — μετά το push σε GitHub/GitLab/Bitbucket:
+# Dashboard → New → Blueprint → επιλέξτε repo και branch.
+#
+# Μυστικά (Google JSON, κωδικός πρόσβασης) ορίζονται στο Render UI ή μέσω
+# «Environment» και ΔΕΝ πρέπει να γεμίζονται εδώ με πραγματικές τιμές.
+
+services:
+  - type: web
+    name: kathariotita-dashboard
+    runtime: python
+    plan: free
+    region: frankfurt
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn dashboard_web:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DASHBOARD_OUTPUT_DIR
+        value: output
+      - key: DASHBOARD_REFRESH_SECONDS
+        value: "30"
+      # Προαιρετικό: κοινόχρηστο username/password για στελέχη (το /health μένει χωρίς auth)
+      - key: DASHBOARD_BASIC_AUTH_USER
+        sync: false
+      - key: DASHBOARD_BASIC_AUTH_PASSWORD
+        sync: false
+      # Ένα από τα δύο: raw JSON ή base64 του JSON (πιο ασφαλές για ειδικούς χαρακτήρες)
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON
+        sync: false
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON_B64
+        sync: false
+      # Προαιρετικό αν χρησιμοποιείτε άλλο φύλλο από το default στον κώδικα
+      - key: DASHBOARD_SPREADSHEET_URL
+        sync: false
