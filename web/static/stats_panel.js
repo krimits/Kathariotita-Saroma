@@ -42,7 +42,7 @@
 
     let data;
     try {
-      const res = await fetch("/api/stats");
+      const res = await fetch("/api/stats", { credentials: "same-origin" });
       data = await res.json();
     } catch (err) {
       console.error(err);

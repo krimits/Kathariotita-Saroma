@@ -4,6 +4,9 @@ const statusLabels = {
   red: "Κόκκινη",
 };
 
+/** Με HTTP Basic Auth, διατηρούμε συνομιλητικό session για same-origin API. */
+const apiFetchInit = { credentials: "same-origin" };
+
 const sourceLabels = {
   veltio: "Βελτιώνω την πόλη μου",
   supervisor: "Επόπτες Καθαριότητας",
@@ -167,7 +170,7 @@ function focusRecordsTab() {
 }
 
 async function loadSummary() {
-  const response = await fetch("/api/summary");
+  const response = await fetch("/api/summary", apiFetchInit);
   const summary = await response.json();
   setText("weekLabel", summary.week_label || "Τρέχουσα εβδομάδα");
   setText("weekStatus", statusLabels[summary.week_status] || summary.week_status || "-");
@@ -209,7 +212,7 @@ async function loadRecords() {
   if (street) params.set("street", street);
   params.set("limit", "200");
 
-  const response = await fetch(`/api/records?${params.toString()}`);
+  const response = await fetch(`/api/records?${params.toString()}`, apiFetchInit);
   const payload = await response.json();
   setText("recordCount", `${formatNumber(payload.total)} εγγραφές`);
 

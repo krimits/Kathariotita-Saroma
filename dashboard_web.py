@@ -103,6 +103,9 @@ async def dashboard_basic_auth(request: Request, call_next: Any) -> Response:
     path = request.url.path
     if path == "/health" or path.startswith("/health/"):
         return await call_next(request)
+    # CSS/JS χωρίς δεύτερο challenge: με Basic Auth πολλά browsers δεν στέλνουν Authorization σε /static/* → σελίδα χωρίς styling/scripts.
+    if path == "/static" or path.startswith("/static/"):
+        return await call_next(request)
     auth_header = request.headers.get("Authorization") or ""
     if not auth_header.startswith("Basic "):
         return _basic_auth_challenge()
@@ -123,9 +126,6 @@ def _basic_auth_challenge() -> Response:
         content="Απαιτείται έλεγχος ταυτότητας.".encode("utf-8"),
         media_type="text/plain; charset=utf-8",
     )
-
-
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
 def _snapshot_after_refresh(summary: dict[str, Any]) -> None:
@@ -281,3 +281,6 @@ def api_records(
         "total": len(records),
         "records": records[:limit],
     }
+
+
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR.resolve())), name="static")
